@@ -58,19 +58,35 @@ export default class Spreadsheet {
     const updates = {};
     
    CellInfo.id = baseCellId;
-   CellInfo.expr = expr
-   updates[CellInfo.id] = CellInfo.expr;
-   const ast_from_parse = parse(CellInfo.expr, CellInfo.id)
-//   console.log(inspect(ast_from_parse, false, Infinity));
-//   function num_from_ast1(ast_from_parse){
-//     function num_from_ast2(ast_from_parse){
-//return ast_from_parse.value;
-//}
-//}
-
-   console.log("The node's value: ", ast_from_parse.value);
+  CellInfo.expr = expr
+  
+   const ast_from_parse = parse(CellInfo.expr, CellInfo.id);
 
 
+
+  /* ast_from_parse.value = parseInt(ast_from_parse.value);
+   console.log("***** Printing the AST *****");
+   console.log(ast_from_parse.type, ast_from_parse.kids);
+   console.log("Type of ast value is: ",typeof ast_from_parse.value);
+   console.log("***** Printing the AST *****");
+ast_from_parse.value = parseInt(ast_from_parse.value);
+if (typeof ast_from_parse.value === 'number'){
+ console.log("The node's value: ",ast_from_parse.value);
+}
+ console.log("the type of ast's value is: ", typeof ast_from_parse.value);
+ */
+
+
+   console.log("***** Start the AST *****");
+   console.log();
+   console.log(ast_from_parse);
+   console.log("Type of ast value is: ",typeof ast_from_parse.value);
+   console.log();
+   console.log("***** End the AST *****");
+   console.log();
+   
+ updates[CellInfo.id] = ast_from_parse.value;
+// console.log(inspect(updates[CellInfo.id], false, Infinity));
    return updates;
   }
 
