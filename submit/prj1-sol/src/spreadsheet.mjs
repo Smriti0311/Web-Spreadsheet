@@ -1,18 +1,49 @@
 import parse from './expr-parser.mjs';
 import AppError from './app-error.mjs';
-import { cellRefToCellId } from './util.mjs';
+import { cellRefToCellId }  from './util.mjs';
+import { indexToColSpec } from './util.mjs';
+import LIMITS from './limits.mjs';
 
 //use for development only
 import { inspect } from 'util';
 
+
+class CellInfo{
+constructor(id, expr, value=0, dependents = new Set(), ast)
+{
+ this.id = id;
+ this.expr = expr;
+ this.value = value;
+ this.dependents = dependents;
+ this.ast = ast;
+}
+}
+
+
 export default class Spreadsheet {
+
+
 
   //factory method
   static async make() { return new Spreadsheet(); }
 
+
   constructor() {
     //@TODO
-  }
+   
+   for(let i = 1; i <= LIMITS.MAX_N_ROWS; i++){
+      for(let j = 0; j < LIMITS.MAX_N_COLS; j++){
+     
+   
+    let c = indexToColSpec(j);
+    let temp_id_string = c + String(i);
+    const cellinfo = new CellInfo(temp_id_string, 'no expr', 0, new Set(), ' ');
+
+}
+   }
+
+}
+  
 
   /** Set cell with id baseCellId to result of evaluating formula
    *  specified by the string expr.  Update all cells which are
@@ -25,9 +56,25 @@ export default class Spreadsheet {
    */
   async eval(baseCellId, expr) {
     const updates = {};
-    //@TODO
-    return updates;
+    
+   CellInfo.id = baseCellId;
+   CellInfo.expr = expr
+   updates[CellInfo.id] = CellInfo.expr;
+   const ast_from_parse = parse(CellInfo.expr, CellInfo.id)
+//   console.log(inspect(ast_from_parse, false, Infinity));
+//   function num_from_ast1(ast_from_parse){
+//     function num_from_ast2(ast_from_parse){
+//return ast_from_parse.value;
+//}
+//}
+
+   console.log("The node's value: ", ast_from_parse.value);
+
+
+   return updates;
   }
+
+
 
   //@TODO add methods
 }
@@ -44,3 +91,4 @@ const FNS = {
 
 
 //@TODO add other classes, functions, constants etc as needed
+

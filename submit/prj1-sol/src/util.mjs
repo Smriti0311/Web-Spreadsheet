@@ -1,7 +1,8 @@
 import LIMITS from './limits.mjs';
 
 function cellRefToCellId(cellRef) {
-  return cellRef.replace(/\$/g, '');
+  return cellRef.replace(/\$/g, ''); // g is for global search
+  // start search from index of last match of this regex in string
 }
 
 function colSpecToIndex(colSpec) {
@@ -34,7 +35,7 @@ function indexToRowSpec(index, baseIndex=0) {
   return String(baseIndex + index + 1);
 }
 
-export {
+export  {
   cellRefToCellId,
   colSpecToIndex,
   indexToColSpec,
