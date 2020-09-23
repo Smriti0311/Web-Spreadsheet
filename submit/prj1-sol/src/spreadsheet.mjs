@@ -7,7 +7,6 @@ import LIMITS from './limits.mjs';
 //use for development only
 import { inspect } from 'util';
 
-
 class CellInfo{
 constructor(id, expr, value=0, dependents = new Set(), ast)
 {
@@ -19,14 +18,10 @@ constructor(id, expr, value=0, dependents = new Set(), ast)
 }
 }
 
-
 export default class Spreadsheet {
-
-
 
   //factory method
   static async make() { return new Spreadsheet(); }
-
 
   constructor() {
     //@TODO
@@ -43,7 +38,8 @@ export default class Spreadsheet {
    }
 
 }
-  
+
+
 
   /** Set cell with id baseCellId to result of evaluating formula
    *  specified by the string expr.  Update all cells which are
@@ -61,22 +57,16 @@ export default class Spreadsheet {
   CellInfo.expr = expr
   
    const ast_from_parse = parse(CellInfo.expr, CellInfo.id);
+  let ret_aux =  eval_aux(ast_from_parse);
+  updates[CellInfo.id] = ret_aux;
+  return updates;
 
 
 
-  /* ast_from_parse.value = parseInt(ast_from_parse.value);
-   console.log("***** Printing the AST *****");
-   console.log(ast_from_parse.type, ast_from_parse.kids);
-   console.log("Type of ast value is: ",typeof ast_from_parse.value);
-   console.log("***** Printing the AST *****");
-ast_from_parse.value = parseInt(ast_from_parse.value);
-if (typeof ast_from_parse.value === 'number'){
- console.log("The node's value: ",ast_from_parse.value);
-}
- console.log("the type of ast's value is: ", typeof ast_from_parse.value);
- */
 
 
+//  TEST CASE 1
+// console.log("\n\tThe type of this ast node is: ",ast_from_parse.type);
    console.log("***** Start the AST *****");
    console.log();
    console.log(ast_from_parse);
@@ -84,16 +74,115 @@ if (typeof ast_from_parse.value === 'number'){
    console.log();
    console.log("***** End the AST *****");
    console.log();
-   
- updates[CellInfo.id] = ast_from_parse.value;
-// console.log(inspect(updates[CellInfo.id], false, Infinity));
-   return updates;
+
+// auxiliary eval method
+function eval_aux(ast_node)
+{
+/*
+   console.log("***** Start the AST *****");
+   console.log(ast_node);
+   console.log("***** End the AST *****");
+*/
+   let temp = 0;
+/*
+   let ret_kids = eval_kids(ast_node)
+   console.log("\t\t***********************");
+   console.log("\t\tThese are the kids ");
+   console.log(ret_kids);
+   console.log("\t\t***********************");
+*/
+  if(ast_node.type === 'num')
+  {
+     	   temp = ast_node.value;
   }
-
-
-
-  //@TODO add methods
+    else  if(ast_node.type === 'app')
+     {
+        //   let temp1 = eval_kids(ast_node.kids)
+	  // console.log(temp1);
+          // temp = check_fn(ast_node, CellInfo.id, CellInfo.expr,updates);
+	  // console.log(temp);
+	  let tmp1 = 0;
+	  let tmp2 = 0;
+	  let flag_num = 0;
+	  let fn_ast = ast_node.fn;
+        for(let i = 0; i < ast_node.kids.length; i++)
+	{
+          if(ast_node.kids[i].type === 'num' )
+	  {
+	  ast_node.kids[i] = ast_node.kids[i].value;
+	  console.log("Kid ",i," = ",ast_node.kids[i]);
+	  flag_num = 1
+          }
+	  else if(ast_node.kids[i].type === 'app')
+	  {
+	  tmp1 = eval_aux(ast_node.kids[i]);
+          }
+        }
+	if(flag_num === 1)
+	{
+	temp = check_fn(ast_node, fn_ast);
+	console.log("the result of this expression is : ",temp);
+	}
+     }
+ 
+return temp;
 }
+
+// fn function
+function check_fn(ast_node, fn_ast)
+{
+        let t = 0;
+        switch(fn_ast)
+	   {
+		case '+':
+		      t=FNS['+'](...ast_node.kids);
+		      break;
+		      
+		case '-':
+		      t = FNS['-'](ast_from_parse.kids[0].value,ast_from_parse.kids[1].value);
+		      break;
+		      
+		case '*':
+		      t = FNS['*'](ast_from_parse.kids[0].value,ast_from_parse.kids[1].value);
+		      break;
+		      
+		case '/':
+		      t = FNS['/'](ast_from_parse.kids[0].value,ast_from_parse.kids[1].value);
+		      break;
+		      
+		case 'min':
+		      t=FNS['min'](ast_from_parse.kids[0].value,ast_from_parse.kids[1].value);
+		      break;
+		      
+		case 'max':
+		      t=FNS['max'](ast_from_parse.kids[0].value,ast_from_parse.kids[1].value);
+		      break;
+		      
+		default:
+			console.log("This is a default case within app\n");
+			break;
+
+           }
+	   return t;
+}// fn function
+
+
+
+}
+  
+  
+  //@TODO add methods
+
+}
+
+
+
+
+
+
+
+
+ 
 
 //Map fn property of Ast type === 'app' to corresponding function.
 const FNS = {
