@@ -106,12 +106,15 @@ export default class PersistentSpreadsheet {
   async clear() {
     try {
       //@TODO
+      const x = await this.preprocess();
+      await this.col.deleteMany({});
     }
     catch (err) {
       const msg = `cannot drop collection ${this.spreadsheetName}: ${err}`;
       throw new AppError('DB', msg);
     }
     /* @TODO delegate to in-memory spreadsheet */
+    this.memss.clear();
   }
 
   /** Delete all info for cellId from this spreadsheet. Return an

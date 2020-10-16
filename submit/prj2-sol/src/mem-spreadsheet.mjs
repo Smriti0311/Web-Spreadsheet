@@ -60,6 +60,7 @@ export default class MemSpreadsheet {
   /** Clear contents of this spreadsheet. No undo information recorded. */
   clear() {
     this._undos = {};
+    this._cells = {};
     //@TODO
   }
 
