@@ -44,9 +44,11 @@ export default class PersistentSpreadsheet {
     return new PersistentSpreadsheet(/* @TODO params */);
   }
 
+  assign;
+
   constructor(props) {
     //@TODO
-    Object.assign(this, props);
+    this.assign = Object.assign(this, props);
   }
 
   /** Release all resources held by persistent spreadsheet.
