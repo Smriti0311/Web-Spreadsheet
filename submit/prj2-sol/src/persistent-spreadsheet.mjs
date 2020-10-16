@@ -9,6 +9,7 @@ import mongo from 'mongodb';
 //use in mongo.connect() to avoid warning
 const MONGO_CONNECT_OPTIONS = { useUnifiedTopology: true };
 
+const DB_NAME = 'spreadsheets';
 
 
 /**
@@ -27,6 +28,14 @@ export default class PersistentSpreadsheet {
   static async make(dbUrl, spreadsheetName) {
     try {
       //@TODO set up database info, including reading data
+      const client = await mongo.connect(dbUrl, MONGO_CONNECT_OPTIONS);
+      const db = client.db(DB_NAME);
+      console.log('DB name: ',client.db().databaseName());
+      const col = db.collection(spreadsheetName);
+      const memss = new MemSpreadsheet();
+
+      console.log('Collection Name: ',col.collectionName);
+      return new PersistentSpreadsheet({client, col, memss});
     }
     catch (err) {
       const msg = `cannot connect to URL "${dbUrl}": ${err}`;
@@ -35,8 +44,9 @@ export default class PersistentSpreadsheet {
     return new PersistentSpreadsheet(/* @TODO params */);
   }
 
-  constructor(/* @TODO params */) {
+  constructor(props) {
     //@TODO
+    Object.assign(this, props);
   }
 
   /** Release all resources held by persistent spreadsheet.
