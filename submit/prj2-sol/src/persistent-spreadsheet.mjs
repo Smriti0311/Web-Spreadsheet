@@ -30,21 +30,21 @@ export default class PersistentSpreadsheet {
       //@TODO set up database info, including reading data
       const client = await mongo.connect(dbUrl, MONGO_CONNECT_OPTIONS);
       const db = client.db(DB_NAME);
-      console.log('DB name: ',client.db().databaseName());
+      //console.log('DB name: ',client.db().databaseName());
       const col = db.collection(spreadsheetName);
       const memss = new MemSpreadsheet();
 
-      console.log('Collection Name: ',col.collectionName);
+      //console.log('Collection Name: ',col.collectionName);
       return new PersistentSpreadsheet({client, col, memss});
     }
     catch (err) {
       const msg = `cannot connect to URL "${dbUrl}": ${err}`;
       throw new AppError('DB', msg);
     }
-    return new PersistentSpreadsheet(/* @TODO params */);
+    return new PersistentSpreadsheet({client, col, memss});
   }
 
-  assign;
+  //assign;
 
   constructor(props) {
     //@TODO
@@ -56,6 +56,12 @@ export default class PersistentSpreadsheet {
    */
   async close() {
     //@TODO
+    try{
+      await this.client.close();
+    }
+    catch(err){
+      throw new AppError('DB',err.toString());
+    }
   }
 
   /** Set cell with id baseCellId to result of evaluating string
@@ -64,12 +70,21 @@ export default class PersistentSpreadsheet {
    *  of all dependent cells to their updated values.
    */
   async eval(baseCellId, formula) {
-    const results = /* @TODO delegate to in-memory spreadsheet */ {}; 
+    
+    const x = await this.preprocess();
+    
+    console.log('logging x of eval: ', x);
+    const results = this.memss.eval(baseCellId, formula);
+    console.log('logging results of eval: ', results);
+    console.log('Properties of x in eval: ',Object.getOwnPropertyNames(x));
     try {
       //@TODO
+      await this.col.insertOne({id: baseCellId, formula: formula});
+      
     }
     catch (err) {
       //@TODO undo mem-spreadsheet operation
+
       const msg = `cannot update "${baseCellId}: ${err}`;
       throw new AppError('DB', msg);
     }
@@ -80,7 +95,11 @@ export default class PersistentSpreadsheet {
    *  return { value: 0, formula: '' } for an empty cell.
    */
   async query(cellId) {
-    return /* @TODO delegate to in-memory spreadsheet */ {}; 
+    
+    const x = await this.preprocess();
+    //console.log('logging in persistent', x);
+    
+    return this.memss.query(cellId); 
   }
 
   /** Clear contents of this spreadsheet */
@@ -162,6 +181,22 @@ export default class PersistentSpreadsheet {
   async dump() {
     return /* @TODO delegate to in-memory spreadsheet */ []; 
   }
+
+  async preprocess()
+  {
+    //console.log('Test print in preprocess');
+    const x = await this.col.find({}).toArray();
+    for(let i = 0; i < x.length; i++)
+    {
+      //this.memss.eval()
+      this.memss.eval(x[i].id, x[i].formula);
+    }
+    //console.log('Logging x in find_db: ',x);
+    return x;
+  }
+
+  
+
 
 }
 

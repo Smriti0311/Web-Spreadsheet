@@ -48,7 +48,13 @@ export default class MemSpreadsheet {
    */
   query(cellId) {
     //@TODO
-    return { };
+    const ret = this.getCell(cellId);
+    //console.log('Logging cell in mem');
+    if(ret.id)
+    {
+      return {'value':ret.value, 'formula':ret.formula};
+    }
+    return {'value':0, 'formula':''};
   }
 
   /** Clear contents of this spreadsheet. No undo information recorded. */
@@ -195,6 +201,12 @@ export default class MemSpreadsheet {
       const cellId = cellRefToCellId(ast.toString(baseCellId));
       this._updateCell(cellId, cell => cell.dependents.delete(baseCellId));
     }
+  }
+
+  getCell(cellId){
+    const id = cellId.replace(/\$/g,'');
+    const cell = this._cells[id];
+    return cell ?? (this._cells[id] = new CellInfo(id, this));
   }
 
 }
