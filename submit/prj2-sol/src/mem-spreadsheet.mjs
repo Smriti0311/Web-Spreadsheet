@@ -71,6 +71,19 @@ export default class MemSpreadsheet {
   delete(cellId) {
     this._undos = {};
     const results = {};
+    // this._updateCell(cellId, cell => cell.dependents.delete(cellId));
+    //console.log(this.getCell(cellId));
+    const ret = this.getCell(cellId);
+    console.log(ret.id)
+    //const ret1 = this._updateCell(cellId, ret => this.eval(ret.id, 0));
+    //console.log('logging value of deleted cell', ret1.value);
+    this._cells[cellId].value = 0;
+    console.log('check cell',this._cells[cellId]);
+
+    
+    
+
+    //delete this._cells[cellId];
     //@TODO
     return results;
   }

@@ -73,13 +73,40 @@ export default class PersistentSpreadsheet {
     
     const x = await this.preprocess();
     
-    console.log('logging x of eval: ', x);
+    //console.log('logging x of eval: ', x);
     const results = this.memss.eval(baseCellId, formula);
-    console.log('logging results of eval: ', results);
-    console.log('Properties of x in eval: ',Object.getOwnPropertyNames(x));
+    //console.log('logging results of eval: ', results);
+    //console.log('Properties of x in eval: ',Object.getOwnPropertyNames(x));
     try {
       //@TODO
-      await this.col.insertOne({id: baseCellId, formula: formula});
+      
+      
+      
+      // write function to check if this cell is already initialised in db
+      //const temp = await this.col.find({id:baseCellId}).toArray();
+
+      const x  = await this.indb(baseCellId);
+      //console.log('Checking if it already exists in  db: ');
+      //console.log(x)
+
+      // if(!x)
+      // {
+      //   await this.col.insertOne({id: baseCellId, formula: formula});
+      // }
+      
+      //const ret = this.memss.getCell(baseCellId);
+
+
+      const query = {id: baseCellId};
+      const update = {$set: {id: baseCellId, formula: formula}};
+      const options =  {upsert: true};
+      await this.col.updateOne(query, update, options);
+      
+
+      
+      
+      
+      
       
     }
     catch (err) {
@@ -122,10 +149,14 @@ export default class PersistentSpreadsheet {
    *  values.  
    */
   async delete(cellId) {
+
+    const x = await this.preprocess();
     let results;
-    results = /* @TODO delegate to in-memory spreadsheet */ {}; 
+    results = this.memss.delete(cellId); 
+
     try {
       //@TODO
+      await this.col.deleteOne({id: cellId});
     }
     catch (err) {
       //@TODO undo mem-spreadsheet operation
@@ -195,6 +226,12 @@ export default class PersistentSpreadsheet {
       this.memss.eval(x[i].id, x[i].formula);
     }
     //console.log('Logging x in find_db: ',x);
+    return x;
+  }
+
+  async indb(baseCellId)
+  {
+    const x = await this.col.find({id: baseCellId}).toArray();
     return x;
   }
 
