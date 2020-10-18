@@ -68,37 +68,81 @@ export default class MemSpreadsheet {
    *  object mapping the id's of all dependent cells to their updated
    *  values.  
    */
+
+
   delete(cellId) {
     this._undos = {};
-    const results = {};
-    // this._updateCell(cellId, cell => cell.dependents.delete(cellId));
-    //console.log(this.getCell(cellId));
-    const ret = this.getCell(cellId);
-    console.log(ret.id)
-    //const ret1 = this._updateCell(cellId, ret => this.eval(ret.id, 0));
-    //console.log('logging value of deleted cell', ret1.value);
-    this._cells[cellId].value = 0;
-    console.log('check cell',this._cells[cellId]);
-
     
     
-
-    //delete this._cells[cellId];
     //@TODO
+
+    // const results = this.eval(cellId, '0');
+    // const cid = cellRefToCellId(cellId);
+    // const ast = parse(this._cells[cellId].formula, cid);
+    // this._updateCell(cellid, cell => cell.ast = ast) ;
+    // delete this._cells[cellId];
+    
+    // const cid = cellRefToCellId(cellId);
+    // this._updateCell(cid, cell => delete this._cells[cellId]);
+    const results = this.eval(cellId, '0');
+    // const ret = this.getCell(cellId);
+    // for(dep of ret.dependents)
+    // {
+    //   this.eval(dep.id, dep.formula);
+    // }
+    const ret = this._cells[cellId];
+    //console.log('the dependents of deleted cell are ',ret.dependents);
+    //console.log('convert deps',ret.dependents.forEach(this.getCell));
+
+    this._updateCell(cellId, ret => delete this._cells[cellId]);
+    //delete this._cells[cellId];
+
+    // for(dep of this._cells[cellId].dependents)
+    // {
+    //   results[dep.id] = this.eval(dep.id, dep.formula);
+    // }
+
+
+    
+    //console.log(this._cells[cellId]);
+
+
     return results;
   }
+
+
 
   /** copy formula from srcCellId to destCellId, adjusting any
    *  relative cell references suitably.  Return an object mapping the
    *  id's of all dependent cells to their updated values. Copying
    *  an empty cell is equivalent to deleting the destination cell.
    */
+
+
+
+
   copy(destCellId, srcCellId) {
     this._undos = {};
     const results = {};
     //@TODO
+    // if(!this._cells[srcCellId])
+    // {
+    //   const destformula = this.adjust(destCellId, srcCellId);
+    //   results = this.eval(destCellId, destformula);
+    // }
+
     return results;
   }
+
+  // adjust(destCellId, srcCellId)
+  // {
+  //   const srcAst = this._cells[srcCellId].ast;
+  //   const destFormula = srcAst.toString(destCellId);
+  //   return destFormula;
+  // }
+
+
+
 
   /** Return dump of cell values as list of cellId and formula pairs.
    *  Do not include any cell's with empty formula.
@@ -122,11 +166,64 @@ export default class MemSpreadsheet {
    *  Note that empty cells must be ignored during the topological
    *  sort.
    */
+
+
+
+
+  // calc_depth(cell)
+  // {
+  //   if(!cell)
+  //   {
+  //     return 0;
+  //   }
+  //   let maxD = 0;
+  //   for(let dep of cell.dependents)
+  //   {
+  //     maxD = max(maxD, calc_depth(dep));
+  //   }
+  //   cell.depth = maxD;
+  //   return cell.depth;
+  // }
+
+  // depth()
+  // {
+  //   const depthObj = {};
+  //   for(let cell of this._cells)
+  //   {
+  //     depthObj[cell.id] = this.calc_depth(cell);
+  //   }
+  //   return depthObj;
+  // }
+
+
+  
+  
   dump() {
     const prereqs = this._makePrereqs();
     //@TODO
+    // let depth_arr = Object.entries(this.depth());
+    // depth_arr.sort((c1, c2) => {
+
+    //   if(c1[1] < c2[1]){
+    //     return -1;
+    //   }
+    //   if(c[1] > c2[1]){
+    //     return 1;
+    //   }
+    //   return c1[0].toString().localeCompare(c2[0].toString());
+    // });
+    // return depth_arr;
     return [];
   }
+
+  
+
+
+
+
+
+
+
 
   /** undo all changes since last operation */
   undo() {

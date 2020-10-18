@@ -8,14 +8,14 @@
   },
   "scripts": {
     "test": "mocha test/",
-    "debug-test": "mocha --inpect-brk test/"
+    "debug-test": "mocha --inspect-brk test/"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^8.1.3"
+    "mocha": "^8.2.0"
   },
   "dependencies": {
     "mongodb": "^3.6.2"
