@@ -48,8 +48,7 @@ function setupRoutes(app) {
   //@TODO add routes to handlers
   app.use(bodyParser.json());
   app.get(`/${BASE}/${STORE}/:id`,doGet(app));
-  //app.put(`/${BASE}/${STORE}/:id`,doReplace(app));
-  //app.delete(`/${BASE}/${STORE}/:id`,doDelete(app));
+  app.delete(`/${BASE}/${STORE}/:ssname/:id`,doDelete(app));
   app.delete(`/${BASE}/${STORE}/:id`, doClear(app));
 
 
@@ -62,8 +61,6 @@ function setupRoutes(app) {
 /****************************** Handlers *******************************/
 
 //@TODO
-
-// need to write something here
 
   
 function doGet(app){
@@ -82,39 +79,17 @@ function doGet(app){
   });
  }
 
-/*
- function doReplace(app){
-   return (async function(req, res){
-     try{
-       const replacement = Object.assign({}, req.body);
-       replacement.id = req.params.id;
-       const results = await app.locals.ssStore.replace(replacement);
-       for (res of results){
-         if(res.length !== 2){
-           throw {
-             isDomainError: true,
-             errorCode: 'BAD_REQUEST',
-             message: `user ${replacement.id} not found`,
-           }
-         }
-       }
-       res.sendstatus(CREATED);
 
-      }
-      catch(err){
-        const mapped = mapError(err);
-        res.status(mappped.status).json(mapped);
-      }
-   });
- }
- */
-/*
  function doDelete(app){
    return (async function(req, res){
      try{
        const id = req.params.id;
-       const results = await app.locals.ssStore.delete({ id: id });
-       res.sendStatus(OK);
+       const ssname = req.params.ssname;
+       console.log('The id is ',id);
+       console.log('The ssname is ',ssname);
+       //const results = {};
+       const results = await app.locals.ssStore.delete(ssname, id);
+       res.status(204).json(results);
      }
      catch(err){
        const mapped = mapError(err);
@@ -123,7 +98,7 @@ function doGet(app){
    });
 
  }
- */
+ 
 
 
  function doClear(app){
@@ -131,24 +106,7 @@ function doGet(app){
      try{
        const id = req.params.id;
        const results = await app.locals.ssStore.clear(id);
-       console.log(results);
        res.status(204).json(results);
-       //res.sendStatus(OK);
-
-       /* 
-       return async function(req, res) {
-    const message = `${req.method} not supported for ${req.originalUrl}`;
-    const result = {
-      status: NOT_FOUND,
-      error: { code: 'NOT_FOUND', message, },
-    };
-    res.status(404).
-	json(result);
-  };
-       
-       
-       
-       */
      }
      catch(err){
        const mapped = mapError(err);
