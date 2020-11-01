@@ -50,6 +50,7 @@ function setupRoutes(app) {
   app.get(`/${BASE}/${STORE}/:id`,doGet(app));
   app.delete(`/${BASE}/${STORE}/:ssname/:id`,doDelete(app));
   app.delete(`/${BASE}/${STORE}/:id`, doClear(app));
+  app.patch(`/${BASE}/${STORE}/:id`, doUpdateAll(app));
 
 
  //must be last
@@ -62,12 +63,40 @@ function setupRoutes(app) {
 
 //@TODO
 
+function doUpdateAll(app){
+  return (async function(req, res){
+    try {
+      const id = req.params.id;
+      const ssname = req.params.ssname;
+      const body = req.body;
+      //console.log('req params is ',id);
+      //console.log('req body is ', body);
+      //console.log('type of collection name = ',typeof ssname);
+      let results = {}
+      for(let b of body){
+        //console.log('type of Cell id ',typeof b[0]);
+        //console.log('type of Cell formula', typeof b[1]);
+        results = await app.locals.ssStore.updateCell(id, b[0], b[1].toString());
+      }
+      res.status(NO_CONTENT).json(results);
+      
+    }
+    catch (err){
+      const mapped = mapError(err);
+      res.status(mapped.status).json(mapped);
+    }
+  });
+}
+
+
+
+
   
 function doGet(app){
  return (async function(req, res){
  try {
  const testss = req.params.id;
- console.log("testss is",testss);
+ //console.log("testss is",testss);
  const results = await app.locals.ssStore.readFormulas(testss);
  res.json(results);
 
