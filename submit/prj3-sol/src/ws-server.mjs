@@ -51,6 +51,9 @@ function setupRoutes(app) {
   app.delete(`/${BASE}/${STORE}/:ssname/:id`,doDelete(app));
   app.delete(`/${BASE}/${STORE}/:id`, doClear(app));
   app.patch(`/${BASE}/${STORE}/:id`, doUpdateAll(app));
+  app.patch(`/${BASE}/${STORE}/:ssname/:id`, doUpdate(app));
+  app.put(`/${BASE}/${STORE}/:id`,doReplaceAll(app));
+  app.put(`/${BASE}/${STORE}/:ssname/:id`,doReplace(app));
 
 
  //must be last
@@ -63,23 +66,72 @@ function setupRoutes(app) {
 
 //@TODO
 
-function doUpdateAll(app){
+function doReplace(app){
   return (async function(req, res){
     try {
       const id = req.params.id;
       const ssname = req.params.ssname;
+      const results = await app.locals.ssStore.delete(ssname, id);
+      const body = req.body['formula'];
+      const results1 = await app.locals.ssStore.updateCell(ssname,id, body);
+      res.status(CREATED).json(results1);  
+    }
+    catch(err){
+      const mapped = mapError(err);
+      res.status(mapped.status).json(mapped); 
+    }
+
+  });
+}
+
+function doReplaceAll(app){
+  return (async function(req, res){
+    try{
+      const id = req.params.id;
+      const results = await app.locals.ssStore.clear(id);
       const body = req.body;
-      //console.log('req params is ',id);
-      //console.log('req body is ', body);
-      //console.log('type of collection name = ',typeof ssname);
+      let results1 = {};
+      for(let b of body){
+        results1 = await app.locals.ssStore.updateCell(id, b[0], b[1].toString());
+      }
+      res.status(CREATED).json(results1);
+    }
+    catch (err){
+      const mapped = mapError(err);
+      res.status(mapped.status).json(mapped); 
+    }
+  });
+}
+
+
+
+function doUpdate(app){
+  return (async function(req, res){
+    try {
+      const id = req.params.id;
+      const body = req.body['formula'];
+      const ssname = req.params.ssname;
+      const results = await app.locals.ssStore.updateCell(ssname, id, body.toString());
+      res.status(NO_CONTENT).json(results);
+    }
+    catch (err){
+      const mapped = mapError(err);
+      res.status(mapped.status).json(mapped); 
+    }
+  });
+}
+
+
+function doUpdateAll(app){
+  return (async function(req, res){
+    try {
+      const id = req.params.id;
+      const body = req.body;
       let results = {}
       for(let b of body){
-        //console.log('type of Cell id ',typeof b[0]);
-        //console.log('type of Cell formula', typeof b[1]);
         results = await app.locals.ssStore.updateCell(id, b[0], b[1].toString());
       }
       res.status(NO_CONTENT).json(results);
-      
     }
     catch (err){
       const mapped = mapError(err);
@@ -87,9 +139,6 @@ function doUpdateAll(app){
     }
   });
 }
-
-
-
 
   
 function doGet(app){
@@ -114,9 +163,6 @@ function doGet(app){
      try{
        const id = req.params.id;
        const ssname = req.params.ssname;
-       console.log('The id is ',id);
-       console.log('The ssname is ',ssname);
-       //const results = {};
        const results = await app.locals.ssStore.delete(ssname, id);
        res.status(204).json(results);
      }
@@ -125,7 +171,6 @@ function doGet(app){
        res.status(mapped.status).json(mapped);
      }
    });
-
  }
  
 
