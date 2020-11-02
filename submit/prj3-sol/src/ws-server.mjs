@@ -4,6 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 
 import {AppError} from 'cs544-ss';
+import { type } from 'os';
 
 /** Storage web service for spreadsheets.  Will report DB errors but
  *  will not make any attempt to report spreadsheet errors like bad
@@ -66,14 +67,11 @@ function setupRoutes(app) {
 
 //@TODO
 
-
+// replaces particular cell of spreadsheet
 function doReplace(app){
   return (async function(req, res){
     try {
-      //const temp = handleFormulaError(req.body);
-      console.log('The request body is',req.body);
       if('formula' in req.body){
-        console.log('HAS FORMULA');
         const id = req.params.id;
         const ssname = req.params.ssname;
         const results = await app.locals.ssStore.delete(ssname, id);
@@ -95,22 +93,39 @@ function doReplace(app){
       const mapped = mapError(err);
       res.status(mapped.status).json(mapped); 
     }
-
   });
 }
 
+// replaces entire spreadsheet
 function doReplaceAll(app){
   return (async function(req, res){
     try{
-      const id = req.params.id;
-      const results = await app.locals.ssStore.clear(id);
-      const body = req.body;
-      console.log('The typeof request body is: ',typeof body)
-      let results1 = {};
-      for(let b of body){
-        results1 = await app.locals.ssStore.updateCell(id, b[0], b[1].toString());
+      let flag = 1;
+      for(let b of req.body){
+        if(b.constructor !== Array){
+          flag = 0;
+          break;
+        }
       }
-      res.status(CREATED).json(results1);
+      if(flag === 1){
+        const id = req.params.id;
+        const results = await app.locals.ssStore.clear(id);
+        const body = req.body;
+        let results1 = {};
+        for(let b of body){
+          results1 = await app.locals.ssStore.updateCell(id, b[0], b[1].toString());
+        }
+        res.status(CREATED).json(results1);
+      }
+      else{
+        const results3 = {'error': {
+          "code": "BAD_REQUEST",
+          "message": "request body must be a list of cellid, formula pairs"
+        },
+        "status": 400
+            }
+            res.status(BAD_REQUEST).json(results3);
+      }
     }
     catch (err){
       const mapped = mapError(err);
@@ -120,7 +135,7 @@ function doReplaceAll(app){
 }
 
 
-
+// updates particular spreadsheet cell
 function doUpdate(app){
   return (async function(req, res){
     try {
@@ -139,8 +154,7 @@ function doUpdate(app){
         "status": 400
             }
             res.status(BAD_REQUEST).json(results3);
-      } 
-      
+      }  
     }
     catch (err){
       const mapped = mapError(err);
@@ -149,17 +163,35 @@ function doUpdate(app){
   });
 }
 
-
+// updates entire spreadsheet
 function doUpdateAll(app){
   return (async function(req, res){
     try {
-      const id = req.params.id;
-      const body = req.body;
-      let results = {}
-      for(let b of body){
-        results = await app.locals.ssStore.updateCell(id, b[0], b[1].toString());
+      let flag = 1;
+      for(let b of req.body){
+        if(b.constructor !== Array){
+          flag = 0;
+          break;
+        }
       }
-      res.status(NO_CONTENT).json(results);
+      if(flag === 1){
+        const id = req.params.id;
+        const body = req.body;
+        let results = {}
+        for(let b of body){
+          results = await app.locals.ssStore.updateCell(id, b[0], b[1]);
+        }
+        res.status(NO_CONTENT).json(results);
+      }
+      else{
+        const results3 = {'error': {
+          "code": "BAD_REQUEST",
+          "message": "request body must be a list of cellid, formula pairs"
+        },
+        "status": 400
+            }
+            res.status(BAD_REQUEST).json(results3);
+      }   
     }
     catch (err){
       const mapped = mapError(err);
@@ -168,24 +200,22 @@ function doUpdateAll(app){
   });
 }
 
-  
+// retrieves all spreadsheet data 
 function doGet(app){
  return (async function(req, res){
  try {
- const testss = req.params.id;
- //console.log("testss is",testss);
- const results = await app.locals.ssStore.readFormulas(testss);
- res.json(results);
-
+   const testss = req.params.id;
+   const results = await app.locals.ssStore.readFormulas(testss);
+   res.json(results);
  }
  catch(err) {
- const mapped = mapError(err);
- res.status(mapped.status).json(mapped);
+   const mapped = mapError(err);
+   res.status(mapped.status).json(mapped);
     }
   });
  }
 
-
+// deletes content of a particular cell
  function doDelete(app){
    return (async function(req, res){
      try{
@@ -202,7 +232,7 @@ function doGet(app){
  }
  
 
-
+// Deletes contents of entire spreadsheet
  function doClear(app){
    return (async function(req, res){
      try{
