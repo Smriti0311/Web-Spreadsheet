@@ -66,15 +66,30 @@ function setupRoutes(app) {
 
 //@TODO
 
+
 function doReplace(app){
   return (async function(req, res){
     try {
-      const id = req.params.id;
-      const ssname = req.params.ssname;
-      const results = await app.locals.ssStore.delete(ssname, id);
-      const body = req.body['formula'];
-      const results1 = await app.locals.ssStore.updateCell(ssname,id, body);
-      res.status(CREATED).json(results1);  
+      //const temp = handleFormulaError(req.body);
+      console.log('The request body is',req.body);
+      if('formula' in req.body){
+        console.log('HAS FORMULA');
+        const id = req.params.id;
+        const ssname = req.params.ssname;
+        const results = await app.locals.ssStore.delete(ssname, id);
+        const body = req.body['formula'];
+        const results1 = await app.locals.ssStore.updateCell(ssname,id, body);
+        res.status(CREATED).json(results1);  
+      }   
+      else{
+        const results3 = {'error': {
+          "code": "BAD_REQUEST",
+          "message": "request body must be a { formula }"
+        },
+        "status": 400
+            }
+            res.status(BAD_REQUEST).json(results3);
+      } 
     }
     catch(err){
       const mapped = mapError(err);
@@ -90,6 +105,7 @@ function doReplaceAll(app){
       const id = req.params.id;
       const results = await app.locals.ssStore.clear(id);
       const body = req.body;
+      console.log('The typeof request body is: ',typeof body)
       let results1 = {};
       for(let b of body){
         results1 = await app.locals.ssStore.updateCell(id, b[0], b[1].toString());
@@ -108,11 +124,23 @@ function doReplaceAll(app){
 function doUpdate(app){
   return (async function(req, res){
     try {
+      if('formula' in req.body){
       const id = req.params.id;
       const body = req.body['formula'];
       const ssname = req.params.ssname;
       const results = await app.locals.ssStore.updateCell(ssname, id, body.toString());
       res.status(NO_CONTENT).json(results);
+      }
+      else{
+        const results3 = {'error': {
+          "code": "BAD_REQUEST",
+          "message": "request body must be a { formula }"
+        },
+        "status": 400
+            }
+            res.status(BAD_REQUEST).json(results3);
+      } 
+      
     }
     catch (err){
       const mapped = mapError(err);
