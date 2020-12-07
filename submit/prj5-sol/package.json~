@@ -1,0 +1,31 @@
+{
+  "name": "prj5-sol",
+  "version": "1.0.0",
+  "description": "Name:\t\tXXX B-Number:\tXXX Email:\t\tXXX",
+  "main": "webpack.config.js",
+  "scripts": {
+    "test": "mocha test/",
+    "debig-test": "mocha --inspect-brk test/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/preset-react": "^7.12.7",
+    "babel-loader": "^8.2.2",
+    "chai": "^4.2.0",
+    "copy-webpack-plugin": "^6.3.2",
+    "ignore-loader": "^0.1.2",
+    "mocha": "^8.2.1",
+    "webpack": "^5.8.0",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "axios": "^0.21.0",
+    "cs544-ss": "file:../../../cs544/lib/cs544-ss",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  }
+}
